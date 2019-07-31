@@ -1,57 +1,8 @@
 <html>
-    <script src='https://d3js.org/d3.v5.min.js'></script>
-    <style> circle {fill: lightblue; stroke: black;} </style>
-    <h1>CS 498 Interactive Visualization</h1>
-    <body onload='init()'>
-        <svg width=600 height=600></svg>
-        <script>
-            async function init() {
-                const data = await d3.csv("https://flunky.github.io/cars2017.csv");
-                var margin = 200;
-                var x = d3.scaleLog().domain([10, 150]).range([0,200]);
-                var y = d3.scaleLog().domain([10, 150]).range([200,0]);
-                d3.select("svg")
-                    .attr("width", 200 + 2*margin)
-                    .attr("height", 200 + 2*margin)
-                    .append("g")
-                        .attr("transform", "translate("+margin+","+margin+")")
-                    .selectAll("circle")
-                    .data(data)
-                    .enter()
-                    .append("circle")
-                        .attr("cx", function(d,i) {return x(d.AverageCityMPG);})
-                        .attr("cy", function(d,i) {return y(d.AverageHighwayMPG);})
-                        .attr("r", function(d,i) {return parseInt(d.EngineCylinders) + 2;});
-                var xAxis = d3.axisBottom(x)
-                    .tickValues([10,20,50,100])
-                    .tickFormat(d3.format("~s"));
-                var yAxis = d3.axisLeft(y)
-                    .tickValues([10,20,50,100])
-                    .tickFormat(d3.format("~s"));
-                d3.select("svg")
-                	.append("g")
-                    .attr("transform", "translate("+margin+","+margin+")")
-                    .append("text")
-    				.attr("fill", "black")
-                    .attr("transform","translate(-10, -10)")
-    				.text("Effects of cylinder count on average MPG");
-                d3.select("svg")
-                    .append("g")
-                    .attr("transform", "translate("+margin+","+margin+")")
-                    .call(yAxis)
-                    .append("text")
-    				.attr("fill", "black")
-    				.attr("transform","translate(-30, 100)")
-    				.text("Avg highway MPG");
-                d3.select("svg")
-                    .append("g")
-                    .attr("transform", "translate("+margin+","+(200+margin)+")")
-                    .call(xAxis)
-    				.append("text")
-    				.attr("fill", "black")
-    				.attr("transform","translate(100, 40)")
-    				.text("Avg city MPG");
-            }
-        </script>
+    <h1>U.S. Income vs. Total Employment</h1>
+    <body>
+        <p>Jonah Willis</p>
+        <p>CS 498 Assignment 7-3-3 Create a Narrative Visualization</p>
     </body>
+    <button onclick="window.location.href = 'page1.html';">Click here to begin</button>
 </html>
