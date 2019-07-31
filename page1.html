@@ -1,57 +1,66 @@
+<!doctype html>
 <html>
-    <script src='https://d3js.org/d3.v5.min.js'></script>
-    <style> circle {fill: lightblue; stroke: black;} </style>
-    <h1>CS 498 Interactive Visualization</h1>
-    <body onload='init()'>
-        <svg width=600 height=600></svg>
-        <script>
-            async function init() {
-                const data = await d3.csv("https://flunky.github.io/cars2017.csv");
-                var margin = 200;
-                var x = d3.scaleLog().domain([10, 150]).range([0,200]);
-                var y = d3.scaleLog().domain([10, 150]).range([200,0]);
-                d3.select("svg")
-                    .attr("width", 200 + 2*margin)
-                    .attr("height", 200 + 2*margin)
-                    .append("g")
-                        .attr("transform", "translate("+margin+","+margin+")")
-                    .selectAll("circle")
-                    .data(data)
-                    .enter()
-                    .append("circle")
-                        .attr("cx", function(d,i) {return x(d.AverageCityMPG);})
-                        .attr("cy", function(d,i) {return y(d.AverageHighwayMPG);})
-                        .attr("r", function(d,i) {return parseInt(d.EngineCylinders) + 2;});
-                var xAxis = d3.axisBottom(x)
-                    .tickValues([10,20,50,100])
-                    .tickFormat(d3.format("~s"));
-                var yAxis = d3.axisLeft(y)
-                    .tickValues([10,20,50,100])
-                    .tickFormat(d3.format("~s"));
-                d3.select("svg")
-                	.append("g")
-                    .attr("transform", "translate("+margin+","+margin+")")
-                    .append("text")
-    				.attr("fill", "black")
-                    .attr("transform","translate(-10, -10)")
-    				.text("Effects of cylinder count on average MPG");
-                d3.select("svg")
-                    .append("g")
-                    .attr("transform", "translate("+margin+","+margin+")")
-                    .call(yAxis)
-                    .append("text")
-    				.attr("fill", "black")
-    				.attr("transform","translate(-30, 100)")
-    				.text("Avg highway MPG");
-                d3.select("svg")
-                    .append("g")
-                    .attr("transform", "translate("+margin+","+(200+margin)+")")
-                    .call(xAxis)
-    				.append("text")
-    				.attr("fill", "black")
-    				.attr("transform","translate(100, 40)")
-    				.text("Avg city MPG");
-            }
-        </script>
-    </body>
+<head>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+    </style>
+    <script src='https://d3js.org/d3.v4.min.js'></script>
+<body>
+<svg width="1000" height="800"></svg>
+<script>
+
+    var svg = d3.select("svg"),
+        margin = 400,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin
+
+    svg.append("text")
+       .attr("transform", "translate(100,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Total Employment for Major U.S. Occupation Groups")
+
+    var xScale = d3.scaleBand().range([0, width]).padding(0.4),
+        yScale = d3.scaleLinear().range([height, 0]);
+
+    var g = svg.append("g")
+               .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+    d3.csv("national_M2018_dl.csv", function(error, data) {
+        if (error) {
+            throw error;
+        }
+
+        xScale.domain(data.map(function(d) { return d.OCC_TITLE; }));
+        yScale.domain([0, d3.max(data, function(d) { return d.TOT_EMP; })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(xScale))
+      	 .selectAll("text")	
+         .style("text-anchor", "end")
+         .attr("dx", "-.8em")
+         .attr("dy", ".15em")
+         .attr("transform", "rotate(-65)");
+
+        g.append("g")
+         .call(d3.axisLeft(yScale).tickFormat(function(d){
+             return d;
+         })
+         .ticks(10));
+
+        g.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .attr("x", function(d) { return xScale(d.OCC_TITLE); })
+         .attr("y", function(d) { return yScale(d.TOT_EMP); })
+         .attr("width", xScale.bandwidth())
+         .attr("height", function(d) { return height - yScale(d.TOT_EMP); });
+    });
+</script>
+</body>
 </html>
