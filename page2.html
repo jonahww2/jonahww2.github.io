@@ -1,11 +1,12 @@
 <!doctype html>
 <html>
-<button onclick="window.location.href = 'index.html';">Prev page</button>
-<button onclick="window.location.href = 'page2.html';">Next page</button>
+<button onclick="window.location.href = 'page1.html';">Prev page</button>
+<button onclick="window.location.href = 'page3.html';">Next page</button>
 <p>
-The chart below shows the occupation groups that we will be looking
-at throughout the slideshow as well as the total employment in each
-group.
+Looking at the same group of occupations, we can see that there is a large
+dicrepancy in average median income. Generally, we can see that the highest
+earning occupation groups require higher levels of formal education in fields
+such as law, business, science, and engineering. 
 </p>
 <head>
     <style>
@@ -14,8 +15,8 @@ group.
         }
         .tooltip {
             position: absolute;
-            width: 200px;
-            height: 28px;
+            width: 300px;
+            height: 100px;
             pointer-events: none;
         }
     </style>
@@ -24,22 +25,22 @@ group.
 <body>
 <svg width="1000" height="800" id=myID></svg>
 <script>
-    //SVG canvas
+
     var svg = d3.select("svg"),
         margin = 400,
         width = svg.attr("width") - margin,
-        height = svg.attr("height") - margin
+        height = svg.attr("height") - margin/2
 
     svg.append("text")
-       .attr("transform", "translate(100,0)")
+       .attr("transform", "translate(275,0)")
        .attr("x", 50)
        .attr("y", 50)
        .attr("font-size", "24px")
-       .text("Total Employment for Major U.S. Occupation Groups")
-
-    var xScale = d3.scaleBand().range([0, width]).padding(0.4),
-        yScale = d3.scaleLinear().range([height, 0]);
-
+       .text("Average Median Income for Major U.S. Occupation Groups")
+        
+    var xScale = d3.scaleLinear().range([0, width]),
+        yScale = d3.scaleBand().range([height, 0]).padding(0.4);
+        
 	//Tooltip
     var tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -48,10 +49,19 @@ group.
     //Annotations
     const annotations = [{
         note: {
-            label: "Hover over each bar for details.",
+            label: "Higher income occupations tend to fall into the business or STEM fields and typically require formal education.",
         },
-        x: 300,
-        y: 300,
+        x: 775,
+        y: 500,
+        dy: 0,
+        dx: 0
+        },
+        {
+        note: {
+            label: "Lower income occupations generally fall into the 'entry level' or 'blue collar' groups.",
+        },
+        x: 500,
+        y: 150,
         dy: 0,
         dx: 0
         }
@@ -61,54 +71,45 @@ group.
     d3.select("#myID")
         .append("g")
         .call(makeAnnotations)
-
+        
     var g = svg.append("g")
-               .attr("transform", "translate(" + 100 + "," + 100 + ")");
+               .attr("transform", "translate(" + 300 + "," + 100 + ")");
 
-	data = d3.csv("https://raw.githubusercontent.com/jonahww2/jonahww2.github.io/master/national_M2018_dl.csv").then(function(data) {
+	data = d3.csv("https://raw.githubusercontent.com/jonahww2/jonahww2.github.io/master/national_M2018_dl_2.csv").then(function(data) {
         console.log(data);
 
-        xScale.domain(data.map(function(d) { return d.OCC_TITLE; }));
-        yScale.domain([0, 22000000]);
+        xScale.domain([0, 110000]);
+        yScale.domain(data.map(function(d) { return d.OCC_TITLE; }));
 
         g.append("g")
          .attr("transform", "translate(0," + height + ")")
          .call(d3.axisBottom(xScale))
       	 .selectAll("text")	
          .style("text-anchor", "end")
-         .attr("dx", "-.8em")
-         .attr("dy", ".15em")
+         .attr("dx", "-1.5em")
+         .attr("dy", "-0.5em")
          .attr("transform", "rotate(-65)");
 
         g.append("g")
          .call(d3.axisLeft(yScale).tickFormat(function(d){
              return d;
-         })
-         .ticks(10))
-         .append("text")
-         .attr("transform", "translate(-25," + height/3 + ")" + " rotate(-90)")
-         .attr("y", 6)
-         .attr("dy", "-5.1em")
-         .attr("text-anchor", "end")
-         .attr("stroke", "black")
-         .text("Total Employment");
+         }));
 
-		//Scatter plot
         g.selectAll(".bar")
-        .data(data)
+         .data(data)
          .enter().append("rect")
          .attr("class", "bar")
-         .attr("x", function(d) { return xScale(d.OCC_TITLE); })
-         .attr("y", function(d) { return yScale(d.TOT_EMP); })
-         .attr("width", xScale.bandwidth())
-         .attr("height", function(d) { return height - yScale(d.TOT_EMP); })
+         .attr("x", 0)
+         .attr("y", function(d) { return yScale(d.OCC_TITLE); })
+         .attr("height", yScale.bandwidth())
+         .attr("width", function(d) { return xScale(d.A_MEDIAN); })
          .on("mouseover", function(d) {
            tooltip.transition()
                 .duration(100)
                 .style("opacity", 1);
            tooltip.html(
-               "Total Employment: " + d.TOT_EMP)
-                .style("left", (d3.event.pageX + 25) + "px")
+               "Total Employment: " + d.A_MEDIAN)
+                .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 25) + "px");
            })
            .on("mouseout", function(d) {

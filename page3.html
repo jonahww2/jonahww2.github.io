@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<button onclick="window.location.href = 'page2.html';">Prev page</button>
+<p>
+Most occupations fall under 10 Million or so people. And these occupations
+appear to be fairly evenly distributed throughout the income ranges.
+Occupations with more than 10 Million people fall exclusevely into the lowest
+median income range, indicating that the lowest skill or entry level occupations
+demand the lowest wages.
+</p>
+<head>
+    <style>
+        .dot {
+            fill: lightblue
+        }
+        .tooltip {
+            position: absolute;
+            width: 400px;
+            height: 100px;
+            pointer-events: none;
+        }
+    </style>
+    <script src='https://d3js.org/d3.v5.min.js'></script>
+    <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+<body>
+<svg width="800" height="800" id=myID></svg>
+<script>
+    //SVG canvas
+    var svg = d3.select("svg"),
+        margin = 100,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - 2*margin
+      
+    //Axes
+    var xScale = d3.scaleLinear().range([0, width]).domain([0, 110000]),
+        yScale = d3.scaleLinear().range([height, 0]).domain([0, 22000000]),
+        rScale = d3.scaleLinear().range([2,10]).domain([0, 130000]);
+
+	//Title
+    svg.append("text")
+       .attr("transform", "translate(300,0)")
+       .attr("x", 50)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Mean Annual Income vs. Total Employment")
+        
+	//Tooltip
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+    
+    //Annotations
+    const annotations = [{
+        note: {
+            label: "Highest total employment occupations",
+        },
+        x: 100,
+        y: 428,
+        dy: 0,
+        dx: 600
+    }]
+    const makeAnnotations = d3.annotation()
+        .annotations(annotations)
+    d3.select("#myID")
+        .append("g")
+        .call(makeAnnotations)
+        
+    var g = svg.append("g")
+    .attr("transform", "translate(" + margin + "," + margin + ")");
+               
+    //Load data
+	data = d3.csv("https://raw.githubusercontent.com/jonahww2/jonahww2.github.io/master/national_M2018_dl_2.csv").then(function(data) {
+        console.log(data);
+
+		//X-axis
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(xScale).tickFormat(function(d){
+            return d;
+          }))
+         .append("text")
+         .attr("transform", "translate(450, 100)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Average Median Income");
+
+		//Y-axis
+        g.append("g")
+         .call(d3.axisLeft(yScale).tickFormat(function(d){
+             return d;
+         }))
+         .append("text")
+         .attr("transform", "translate(-25," + height/2.5 + ")" + " rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Total Employment");
+
+		//Scatter plot
+        g.selectAll(".dot")
+         .data(data)
+         .enter().append("circle")
+         .attr("class", "dot")
+         .attr("r", function(d) { return rScale(d.A_MEAN);})
+         .attr("cx", function(d) {return xScale(d.A_MEDIAN);})
+         .attr("cy", function(d) { return yScale(d.TOT_EMP);})
+         .on("mouseover", function(d) {
+           tooltip.transition()
+                .duration(100)
+                .style("opacity", 1);
+           tooltip.html(
+               "Occupation: " + d.OCC_TITLE + "</br>" +
+               "Total Employment: " + d.TOT_EMP + "</br>" +
+               "Mean Income: " + d.A_MEAN + "</br>" + 
+               "Median Income: " + d.A_MEDIAN)
+                .style("left", (d3.event.pageX + 25) + "px")
+                .style("top", (d3.event.pageY - 25) + "px");
+           })
+           .on("mouseout", function(d) {
+               tooltip.transition()
+               .duration(100)
+               .style("opacity", 0);
+      });
+    });
+</script>
+</body>
+</html>
